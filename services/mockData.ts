@@ -15,34 +15,34 @@ export const MOCK_TASKS: Task[] = [
 ];
 
 export const MOCK_SESSIONS: WorkSession[] = [
-    { id: '1', taskTitle: 'Database Design', time: '09:00 - 11:00', day: 'Mon', ownerId: 'u1', ownerName: 'You', isUser: true },
-    { id: '2', taskTitle: 'React Native Study', time: '14:00 - 16:00', day: 'Mon', ownerId: 'u1', ownerName: 'You', isUser: true },
-    { id: '3', taskTitle: 'Algorithm Practice', time: '10:00 - 12:00', day: 'Tue', ownerId: 'u1', ownerName: 'You', isUser: true },
-    { id: '4', taskTitle: 'Project Meeting', time: '15:00 - 16:30', day: 'Wed', ownerId: 'u1', ownerName: 'You', isUser: true },
-    // Peers
-    { id: '5', taskTitle: 'Linear Algebra Study', time: '10:00 - 12:00', day: 'Mon', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
-    { id: '6', taskTitle: 'Web Dev Project', time: '14:00 - 17:00', day: 'Mon', ownerId: 'p2', ownerName: 'Lucas Van Der Berg', isUser: false },
-    { id: '7', taskTitle: 'Database Assignment', time: '09:00 - 11:00', day: 'Tue', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
-    { id: '8', taskTitle: 'ML Study Group', time: '13:00 - 15:00', day: 'Tue', ownerId: 'g1', ownerName: 'CS Study Group', isUser: false },
-    { id: '9', taskTitle: 'UI Design', time: '16:00 - 18:00', day: 'Tue', ownerId: 'p3', ownerName: 'Sophie Martinez', isUser: false },
-    { id: '10', taskTitle: 'Algorithms Practice', time: '10:00 - 12:00', day: 'Wed', ownerId: 'p2', ownerName: 'Lucas Van Der Berg', isUser: false },
-    { id: '11', taskTitle: 'Group Presentation Prep', time: '14:00 - 16:00', day: 'Thu', ownerId: 'g1', ownerName: 'CS Study Group', isUser: false },
-    { id: '12', taskTitle: 'Python Workshop', time: '15:00 - 17:00', day: 'Thu', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
+  { id: '1', taskTitle: 'Database Design', time: '09:00 - 11:00', day: '2024-12-30', ownerId: 'u1', ownerName: 'You', isUser: true },
+  { id: '2', taskTitle: 'React Native Study', time: '14:00 - 16:00', day: '2024-12-30', ownerId: 'u1', ownerName: 'You', isUser: true },
+  { id: '3', taskTitle: 'Algorithm Practice', time: '10:00 - 12:00', day: '2024-12-31', ownerId: 'u1', ownerName: 'You', isUser: true },
+  { id: '4', taskTitle: 'Project Meeting', time: '15:00 - 16:30', day: '2025-01-01', ownerId: 'u1', ownerName: 'You', isUser: true },
+  // Peers
+  { id: '5', taskTitle: 'Linear Algebra Study', time: '10:00 - 12:00', day: '2024-12-30', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
+  { id: '6', taskTitle: 'Web Dev Project', time: '14:00 - 17:00', day: '2024-12-30', ownerId: 'p2', ownerName: 'Lucas Van Der Berg', isUser: false },
+  { id: '7', taskTitle: 'Database Assignment', time: '09:00 - 11:00', day: '2024-12-31', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
+  { id: '8', taskTitle: 'ML Study Group', time: '13:00 - 15:00', day: '2024-12-31', ownerId: 'g1', ownerName: 'CS Study Group', isUser: false },
+  { id: '9', taskTitle: 'UI Design', time: '16:00 - 18:00', day: '2024-12-31', ownerId: 'p3', ownerName: 'Sophie Martinez', isUser: false },
+  { id: '10', taskTitle: 'Algorithms Practice', time: '10:00 - 12:00', day: '2025-01-01', ownerId: 'p2', ownerName: 'Lucas Van Der Berg', isUser: false },
+  { id: '11', taskTitle: 'Group Presentation Prep', time: '14:00 - 16:00', day: '2025-01-02', ownerId: 'g1', ownerName: 'CS Study Group', isUser: false },
+  { id: '12', taskTitle: 'Python Workshop', time: '15:00 - 17:00', day: '2025-01-02', ownerId: 'p1', ownerName: 'Emma Johnson', isUser: false },
 ];
 
 export const MOCK_PEERS: Peer[] = [
-    { id: 'p1', name: 'Emma Johnson', education: 'Computer Science, KU Leuven', type: 'friend' },
-    { id: 'p2', name: 'Lucas Van Der Berg', education: 'Software Engineering, KU Leuven', type: 'friend' },
-    { id: 'p3', name: 'Sophie Martinez', education: 'Computer Science, KU Leuven', type: 'friend' },
-    { id: 'g1', name: 'CS Study Group', members: 12, type: 'group' },
-    { id: 'g2', name: 'Database Project Team', members: 4, type: 'group' },
-    { id: 'g3', name: 'Algorithms Study Circle', members: 8, type: 'group' },
+  { id: 'p1', name: 'Emma Johnson', education: 'Computer Science, KU Leuven', type: 'friend' },
+  { id: 'p2', name: 'Lucas Van Der Berg', education: 'Software Engineering, KU Leuven', type: 'friend' },
+  { id: 'p3', name: 'Sophie Martinez', education: 'Computer Science, KU Leuven', type: 'friend' },
+  { id: 'g1', name: 'CS Study Group', members: 12, type: 'group' },
+  { id: 'g2', name: 'Database Project Team', members: 4, type: 'group' },
+  { id: 'g3', name: 'Algorithms Study Circle', members: 8, type: 'group' },
 ];
 
 export const MOCK_WEEK_DAYS = [
-    { day: 'Monday, 30 December', key: 'Mon' },
-    { day: 'Tuesday, 31 December', key: 'Tue' },
-    { day: 'Wednesday, 1 January', key: 'Wed' },
-    { day: 'Thursday, 2 January', key: 'Thu' },
-    { day: 'Friday, 3 January', key: 'Fri' }
+  { day: 'Monday, 30 December', key: '2024-12-30' },
+  { day: 'Tuesday, 31 December', key: '2024-12-31' },
+  { day: 'Wednesday, 1 January', key: '2025-01-01' },
+  { day: 'Thursday, 2 January', key: '2025-01-02' },
+  { day: 'Friday, 3 January', key: '2025-01-03' }
 ];

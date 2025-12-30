@@ -5,7 +5,7 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: '#2563EB', headerShown: false }}>
       <Tabs.Screen
-        name="index"
+        name="calendar"
         options={{
           title: 'Calendar',
           tabBarIcon: ({ color }) => <AntDesign name="calendar" size={24} color={color} />,

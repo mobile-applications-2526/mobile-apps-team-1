@@ -63,7 +63,7 @@ export default function CalendarScreen() {
                   {peerCount > 0 && (
                     <TouchableOpacity
                       onPress={() => {
-                        router.push({ pathname: '/details/worksessions/[date]', params: { date: dayGroup.key } });
+                        router.push(`../details/worksessions/${dayGroup.key}`);
                       }}
                       style={styles.peerCount}
                     >
@@ -79,7 +79,7 @@ export default function CalendarScreen() {
                   <SessionCard
                     key={session.id}
                     session={session}
-                    onPress={() => router.push({ pathname: '/details/session/[id]', params: { id: session.id } })}
+                    onPress={() => router.push(`../details/session/${session.id}`)}
                   />
                 ))}
 
