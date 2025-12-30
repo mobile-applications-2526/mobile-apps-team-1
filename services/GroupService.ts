@@ -1,10 +1,10 @@
-import LoginService from './LoginService';
+import { getToken } from './StorageService';
 
 const apiUrl = "http://localhost:8080";
 
 
 const getGroups = async () => {
-    const token = await LoginService.getToken(); // <-- dit gebruikt nu SecureStore
+    const token = await getToken();
             
     if (!token) {
         throw new Error('Geen token gevonden, log opnieuw in niffo');

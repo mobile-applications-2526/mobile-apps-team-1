@@ -1,7 +1,8 @@
+import LoginService from '@/services/LoginService';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import LoginService from '../../services/LoginService';
+import { getToken } from '../../services/StorageService';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function LoginScreen() {
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
-                const token = await LoginService.getToken();
+                const token = await getToken();
                 if (token) {
                     setIsLoggedIn(true);
                     // Optioneel: direct doorsturen naar profile als je wil
