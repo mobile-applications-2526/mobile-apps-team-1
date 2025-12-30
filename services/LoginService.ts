@@ -1,6 +1,7 @@
-import * as Keychain from 'react-native-keychain';
+// services/LoginService.ts
+import { getToken, removeToken, setToken } from './StorageService';
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://localhost:8080"; // of je juiste url
 
 const login = async (email: string, password: string) => {
     const response = await fetch(apiUrl + '/users/login', {
@@ -12,29 +13,29 @@ const login = async (email: string, password: string) => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Login failed');
     }
 
     const data = await response.json();
-
     console.log("ik ben de token: " + data.token);
 
-    await Keychain.setGenericPassword('token', data.token);
-    
-    const credentials = await Keychain.getGenericPassword();
-    console.log(credentials);
+    await setToken(data.token); // <-- hier
+
+    const check = await getToken();
+    console.log("Direct gecheckt:", check);
 
     return data;
 };
 
 const logout = async () => {
-    await Keychain.resetGenericPassword();
+    await removeToken();
 };
 
 const LoginService = {
     login,
     logout,
+    getToken,
 };
 
 export default LoginService;

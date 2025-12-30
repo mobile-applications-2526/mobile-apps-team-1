@@ -9,6 +9,7 @@
         "./*"
       ],
       "@lib/*": ["lib/*"],
+      "@services/*": ["services/*"],
     }
   },
   "include": [

@@ -1,12 +1,12 @@
-import * as Keychain from 'react-native-keychain';
+import LoginService from './LoginService';
 
 const apiUrl = "http://localhost:8080";
 
 
 const getGroups = async () => {
-    const credentials = await Keychain.getGenericPassword();
+    const token = await LoginService.getToken(); // <-- dit gebruikt nu SecureStore
             
-    if (!credentials) {
+    if (!token) {
         throw new Error('Geen token gevonden, log opnieuw in niffo');
     }
 
@@ -14,12 +14,14 @@ const getGroups = async () => {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${credentials.password}`,
+            Authorization: `Bearer ${token}`,
         },
     });
 
     if (!response.ok) {
-        throw new Error('Failed lmao');
+        const errorText = await response.text();
+        console.error("Groups error:", errorText);
+        throw new Error('Failed to fetch groups lmao');
     }
 
     return response.json();
