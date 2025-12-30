@@ -3,10 +3,12 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "strict": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@lib/*": ["lib/*"],
     }
   },
   "include": [
