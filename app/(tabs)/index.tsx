@@ -56,16 +56,14 @@ export default function CalendarScreen() {
           {schedule.map((dayGroup) => {
             const peerCount = dayGroup.sessions.filter(s => !s.isUser).length;
             const userSessions = dayGroup.sessions.filter(s => s.isUser);
-            
             return (
               <View key={dayGroup.key} style={styles.dayCard}>
                 <View style={styles.dayHeader}>
                   <Text style={styles.dayTitle}>{dayGroup.day}</Text>
                   {peerCount > 0 && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       onPress={() => {
-                        /* Handle navigating to day detail */
-                        console.log('Navigate to day detail');
+                        router.push({ pathname: '/details/worksessions/[date]', params: { date: dayGroup.key } });
                       }}
                       style={styles.peerCount}
                     >
@@ -76,19 +74,19 @@ export default function CalendarScreen() {
                     </TouchableOpacity>
                   )}
                 </View>
-                
+
                 {userSessions.map(session => (
-                    <SessionCard 
-                        key={session.id} 
-                        session={session} 
-                        onPress={() => router.push(`/details/session/${session.id}`)}
-                    />
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    onPress={() => router.push({ pathname: '/details/session/[id]', params: { id: session.id } })}
+                  />
                 ))}
 
                 {userSessions.length === 0 && (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyStateText}>No sessions</Text>
-                    </View>
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>No sessions</Text>
+                  </View>
                 )}
               </View>
             );
@@ -180,11 +178,11 @@ const styles = StyleSheet.create({
     color: '#2563EB',
   },
   emptyState: {
-      padding: 12,
+    padding: 12,
   },
   emptyStateText: {
-      color: '#9CA3AF',
-      fontSize: 14,
+    color: '#9CA3AF',
+    fontSize: 14,
   },
   fab: {
     position: 'absolute',
