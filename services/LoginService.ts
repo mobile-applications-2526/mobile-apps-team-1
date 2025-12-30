@@ -1,7 +1,7 @@
 // services/LoginService.ts
 import { getToken, removeToken, setToken } from './StorageService';
 
-const apiUrl = "http://localhost:8080"; // of je juiste url
+const apiUrl = "http://cedvinvu.be";
 
 const login = async (email: string, password: string) => {
     const response = await fetch(apiUrl + '/users/login', {

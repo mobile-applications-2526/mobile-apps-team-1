@@ -1,6 +1,6 @@
 import { getToken } from './StorageService';
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://cedvinvu.be";
 
 
 const getGroups = async () => {
