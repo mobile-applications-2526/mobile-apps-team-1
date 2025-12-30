@@ -1,0 +1,3 @@
+[submodule "mobile-backend"]
+	path = mobile-backend
+	url = https://github.com/Yoeri-Vandevoorde/mobile-backend.git
