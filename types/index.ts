@@ -47,3 +47,11 @@ export interface DaySessionGroup {
   key: string;
   sessions: WorkSession[];
 }
+
+export interface BackendUser {
+  id: string ;
+  username: string;
+  email: string ;
+  password?: string;       
+  profile?: any;            
+}

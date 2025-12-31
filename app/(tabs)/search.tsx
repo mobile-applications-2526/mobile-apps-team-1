@@ -1,10 +1,10 @@
 import FilterBadge from '@/components/FilterBadge';
 import PeerCard from '@/components/PeerCard';
 import GroupService from '@/services/GroupService';
+import UserService from '@/services/UserService';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { api } from '../../services/api';
 import { Peer } from '../../types';
 
 export default function SearchScreen() {
@@ -20,10 +20,12 @@ export default function SearchScreen() {
 
   const loadData = async () => {
     try {
-      const data = await api.getPeers();
+      const data = await UserService.getUsers();
       const data2 = await GroupService.getGroups();
+      const allPeers = [...data, ...data2];
+      console.log(data);
       console.log(data2);
-      setItems(data2);
+      setItems(allPeers);
     } catch (error) {
       console.error(error);
     } finally {

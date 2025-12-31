@@ -20,7 +20,7 @@ const login = async (email: string, password: string) => {
     const data = await response.json();
     console.log("ik ben de token: " + data.token);
 
-    await setToken(data.token); // <-- hier
+    await setToken(data.token);
     await setUserId(data.userId);
     
     const check = await getToken();
