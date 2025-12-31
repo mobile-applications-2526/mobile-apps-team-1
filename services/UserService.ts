@@ -1,7 +1,8 @@
 import { BackendUser, Peer } from '@/types';
+import { API_URL } from './Config';
 import { getToken } from './StorageService';
 
-const apiUrl = "http://cedvinvu.be/users";
+const apiUrl = `${API_URL}/users`;
 
 export function mapUserToPeer(backendUser: BackendUser, type: 'friend' | 'group' | 'person', members?: number): Peer {
   const name = backendUser.profile?.displayName || backendUser.username;
@@ -27,56 +28,56 @@ export function mapUsersToPeers(
 }
 
 const getUsers = async () => {
-    const token = await getToken();
-            
-    if (!token) {
-        throw new Error('Geen token gevonden, log opnieuw in niffo');
-    }
+  const token = await getToken();
 
-    const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-    });
+  if (!token) {
+    throw new Error('No token found, retry login');
+  }
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Users error:", errorText);
-        throw new Error('Failed to fetch users lmao');
-    }
+  const response = await fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    const data = await response.json();
-    console.log(data);
-    return mapUsersToPeers(data, 'person');
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Users error:", errorText);
+    throw new Error('Failed to fetch users');
+  }
+
+  const data = await response.json();
+  console.log(data);
+  return mapUsersToPeers(data, 'person');
 };
 
 
 const getUserById = async (id: string) => {
-    const token = await getToken(); // make sure this returns the JWT
-    const response = await fetch(`${apiUrl}/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
+  const token = await getToken(); // make sure this returns the JWT
+  const response = await fetch(`${apiUrl}/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-        const errorMessage = data?.NotFoundException || data?.error || 'Failed to fetch user';
-        throw new Error(errorMessage);
-    }
+  if (!response.ok) {
+    const errorMessage = data?.NotFoundException || data?.error || 'Failed to fetch user';
+    throw new Error(errorMessage);
+  }
 
-    return data;
+  return data;
 };
 
 
 const UserService = {
-    getUsers,
-    getUserById,
+  getUsers,
+  getUserById,
 };
 
 export default UserService;

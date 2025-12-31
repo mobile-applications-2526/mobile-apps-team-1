@@ -1,13 +1,14 @@
+import { API_URL } from './Config';
 import { getToken } from './StorageService';
 
-const apiUrl = "http://cedvinvu.be";
+const apiUrl = API_URL;
 
 
 const getGroups = async () => {
     const token = await getToken();
-            
+
     if (!token) {
-        throw new Error('Geen token gevonden, log opnieuw in niffo');
+        throw new Error('No token found, retry login');
     }
 
     const response = await fetch(apiUrl + '/groups', {
@@ -21,7 +22,7 @@ const getGroups = async () => {
     if (!response.ok) {
         const errorText = await response.text();
         console.error("Groups error:", errorText);
-        throw new Error('Failed to fetch groups lmao');
+        throw new Error('Failed to fetch groups');
     }
 
     return response.json();
@@ -37,7 +38,7 @@ const createGroup = async () => {
     });
 
     if (!response.ok) {
-        throw new Error('Failed lmao');
+        throw new Error('Failed to create group');
     }
 
     return response.json();
@@ -53,7 +54,7 @@ const updateGroup = async () => {
     });
 
     if (!response.ok) {
-        throw new Error('Failed lmao');
+        throw new Error('Failed to update group');
     }
 
     return response.json();
