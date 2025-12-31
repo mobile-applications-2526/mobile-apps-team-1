@@ -55,3 +55,12 @@ export interface BackendUser {
   password?: string;       
   profile?: any;            
 }
+
+export interface BackendGroup {
+  id: string;
+  name: string;
+  members: {
+    userId: string;
+    role: string;
+  }[];
+}

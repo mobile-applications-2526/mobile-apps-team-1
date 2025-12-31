@@ -1,8 +1,21 @@
+import { BackendGroup, Peer } from '@/types';
 import { API_URL } from './Config';
 import { getToken } from './StorageService';
 
 const apiUrl = API_URL;
 
+export function mapGroupToPeer(group: BackendGroup): Peer {
+    return {
+        id: group.id,
+        name: group.name,
+        members: group.members.length,
+        type: 'group' as const,
+    };
+}
+
+export function mapGroupsToPeers(groups: BackendGroup[]): Peer[] {
+    return groups.map(mapGroupToPeer);
+}
 
 const getGroups = async () => {
     const token = await getToken();
@@ -25,7 +38,8 @@ const getGroups = async () => {
         throw new Error('Failed to fetch groups');
     }
 
-    return response.json();
+    const backendGroups = await response.json();
+    return mapGroupsToPeers(backendGroups);
 };
 
 // Voor later

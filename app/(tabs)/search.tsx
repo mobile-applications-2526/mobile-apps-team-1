@@ -23,8 +23,6 @@ export default function SearchScreen() {
       const data = await UserService.getUsers();
       const data2 = await GroupService.getGroups();
       const allPeers = [...data, ...data2];
-      console.log(data);
-      console.log(data2);
       setItems(allPeers);
     } catch (error) {
       console.error(error);
