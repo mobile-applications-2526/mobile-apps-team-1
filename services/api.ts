@@ -58,7 +58,9 @@ export const api = {
     }
 
     return weekDays.map(d => {
-      const sessions = allSessions.filter(s => s.day === d.key);
+      const sessions = allSessions
+        .filter(s => s.day === d.key)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
       return {
         day: d.day,
         key: d.key,

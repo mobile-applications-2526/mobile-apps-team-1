@@ -28,12 +28,10 @@ export default function AddWorksessionScreen() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [showTaskSelector, setShowTaskSelector] = useState(false);
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date(Date.now() + 3600000)); // 1 hour later
-    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+    const [date, setDate] = useState(new Date());
+    const [duration, setDuration] = useState('1'); // Duration in hours as string for TextInput
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fetchingTasks, setFetchingTasks] = useState(true);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -94,45 +92,24 @@ export default function AddWorksessionScreen() {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     };
 
-    const onStartDateChange = (event: any, selectedDate?: Date) => {
-        setShowStartDatePicker(Platform.OS === 'ios');
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(Platform.OS === 'ios');
         if (selectedDate) {
-            const newStartDate = new Date(startDate);
-            newStartDate.setFullYear(selectedDate.getFullYear());
-            newStartDate.setMonth(selectedDate.getMonth());
-            newStartDate.setDate(selectedDate.getDate());
-            setStartDate(newStartDate);
+            const newDate = new Date(date);
+            newDate.setFullYear(selectedDate.getFullYear());
+            newDate.setMonth(selectedDate.getMonth());
+            newDate.setDate(selectedDate.getDate());
+            setDate(newDate);
         }
     };
 
-    const onStartTimeChange = (event: any, selectedTime?: Date) => {
-        setShowStartTimePicker(Platform.OS === 'ios');
+    const onTimeChange = (event: any, selectedTime?: Date) => {
+        setShowTimePicker(Platform.OS === 'ios');
         if (selectedTime) {
-            const newStartDate = new Date(startDate);
-            newStartDate.setHours(selectedTime.getHours());
-            newStartDate.setMinutes(selectedTime.getMinutes());
-            setStartDate(newStartDate);
-        }
-    };
-
-    const onEndDateChange = (event: any, selectedDate?: Date) => {
-        setShowEndDatePicker(Platform.OS === 'ios');
-        if (selectedDate) {
-            const newEndDate = new Date(endDate);
-            newEndDate.setFullYear(selectedDate.getFullYear());
-            newEndDate.setMonth(selectedDate.getMonth());
-            newEndDate.setDate(selectedDate.getDate());
-            setEndDate(newEndDate);
-        }
-    };
-
-    const onEndTimeChange = (event: any, selectedTime?: Date) => {
-        setShowEndTimePicker(Platform.OS === 'ios');
-        if (selectedTime) {
-            const newEndDate = new Date(endDate);
-            newEndDate.setHours(selectedTime.getHours());
-            newEndDate.setMinutes(selectedTime.getMinutes());
-            setEndDate(newEndDate);
+            const newDate = new Date(date);
+            newDate.setHours(selectedTime.getHours());
+            newDate.setMinutes(selectedTime.getMinutes());
+            setDate(newDate);
         }
     };
 
@@ -147,8 +124,27 @@ export default function AddWorksessionScreen() {
             return false;
         }
 
-        if (startDate >= endDate) {
-            Alert.alert('Validation Error', 'Start time must be before end time');
+        // Check if date is in the past
+        const now = new Date();
+        if (date < now) {
+            Alert.alert('Validation Error', 'Cannot create worksession in the past');
+            return false;
+        }
+
+        // Validate duration
+        const durationNum = parseFloat(duration);
+        if (isNaN(durationNum) || durationNum <= 0) {
+            Alert.alert('Validation Error', 'Please enter a valid duration');
+            return false;
+        }
+
+        if (durationNum > 8) {
+            Alert.alert('Validation Error', 'Duration cannot exceed 8 hours');
+            return false;
+        }
+
+        if (durationNum < 0.5) {
+            Alert.alert('Validation Error', 'Duration must be at least 0.5 hours (30 minutes)');
             return false;
         }
 
@@ -168,10 +164,14 @@ export default function AddWorksessionScreen() {
         try {
             setLoading(true);
 
+            // Calculate end time by adding duration to start date
+            const durationNum = parseFloat(duration);
+            const endDate = new Date(date.getTime() + durationNum * 3600000); // Convert hours to milliseconds
+
             const request: CreateWorksessionRequest = {
                 title: title.trim(),
                 timeRange: {
-                    startTime: toISOString(startDate),
+                    startTime: toISOString(date),
                     endTime: toISOString(endDate),
                 },
                 subjectId: selectedTask!.id,
@@ -199,9 +199,10 @@ export default function AddWorksessionScreen() {
                 ],
                 { cancelable: false }
             );
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating worksession:', error);
-            Alert.alert('Error', 'Failed to create worksession. Please try again.');
+            const errorMessage = error.message || 'Failed to create worksession. Please try again.';
+            Alert.alert('Error', errorMessage);
         } finally {
             setLoading(false);
         }
@@ -279,81 +280,59 @@ export default function AddWorksessionScreen() {
                     </Modal>
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Start Date & Time *</Text>
+                        <Text style={styles.label}>Date & Time *</Text>
                         <View style={styles.dateTimeRow}>
                             <TouchableOpacity
                                 style={styles.dateTimeButton}
-                                onPress={() => setShowStartDatePicker(true)}
+                                onPress={() => setShowDatePicker(true)}
                             >
-                                <Text style={styles.dateTimeText}>{formatDate(startDate)}</Text>
+                                <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.dateTimeButton}
-                                onPress={() => setShowStartTimePicker(true)}
+                                onPress={() => setShowTimePicker(true)}
                             >
-                                <Text style={styles.dateTimeText}>{formatTime(startDate)}</Text>
+                                <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
-                    {showStartDatePicker && (
+                    {showDatePicker && (
                         <DateTimePicker
-                            value={startDate}
+                            value={date}
                             mode="date"
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={onStartDateChange}
+                            onChange={onDateChange}
+                            minimumDate={new Date()} // Prevent selecting past dates
                         />
                     )}
 
-                    {showStartTimePicker && (
+                    {showTimePicker && (
                         <DateTimePicker
-                            value={startDate}
+                            value={date}
                             mode="time"
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={onStartTimeChange}
+                            onChange={onTimeChange}
                         />
                     )}
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>End Date & Time *</Text>
-                        <View style={styles.dateTimeRow}>
-                            <TouchableOpacity
-                                style={styles.dateTimeButton}
-                                onPress={() => setShowEndDatePicker(true)}
-                            >
-                                <Text style={styles.dateTimeText}>{formatDate(endDate)}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.dateTimeButton}
-                                onPress={() => setShowEndTimePicker(true)}
-                            >
-                                <Text style={styles.dateTimeText}>{formatTime(endDate)}</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <Text style={styles.label}>Duration (hours) *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={duration}
+                            onChangeText={setDuration}
+                            placeholder="Enter duration (max 8 hours)"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="decimal-pad"
+                        />
+                        <Text style={styles.helperText}>Maximum 8 hours</Text>
                     </View>
-
-                    {showEndDatePicker && (
-                        <DateTimePicker
-                            value={endDate}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={onEndDateChange}
-                        />
-                    )}
-
-                    {showEndTimePicker && (
-                        <DateTimePicker
-                            value={endDate}
-                            mode="time"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={onEndTimeChange}
-                        />
-                    )}
 
                     <View style={styles.summary}>
                         <Text style={styles.summaryLabel}>Summary</Text>
                         <Text style={styles.summaryText}>
-                            {title || 'Untitled'} from {formatDateTime(startDate)} to {formatDateTime(endDate)}
+                            {title || 'Untitled'} on {formatDateTime(date)} for {duration || '0'} hour{parseFloat(duration) !== 1 ? 's' : ''}
                         </Text>
                     </View>
                 </View>
@@ -411,6 +390,11 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         color: '#111827',
+    },
+    helperText: {
+        fontSize: 12,
+        color: '#6B7280',
+        marginTop: 4,
     },
     selectorButton: {
         flexDirection: 'row',

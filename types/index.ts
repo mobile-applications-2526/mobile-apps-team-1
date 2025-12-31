@@ -33,6 +33,7 @@ export interface WorkSession {
   taskId?: string; // Links to a task if applicable
   taskTitle: string;
   time: string;
+  startTime: string; // ISO string for sorting
   day: string; // 'Mon', 'Tue', etc.
   ownerId: string;
   ownerName: string;
@@ -54,11 +55,11 @@ export interface DaySessionGroup {
 }
 
 export interface BackendUser {
-  id: string ;
+  id: string;
   username: string;
-  email: string ;
-  password?: string;       
-  profile?: any;            
+  email: string;
+  password?: string;
+  profile?: any;
 }
 
 export interface BackendGroup {

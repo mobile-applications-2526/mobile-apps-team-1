@@ -62,6 +62,7 @@ const getWorksessions = async (): Promise<WorkSession[]> => {
         id: bs.id,
         taskTitle: bs.title,
         time: `${formatTime(bs.timeRange.startTime)} - ${formatTime(bs.timeRange.endTime)}`,
+        startTime: bs.timeRange.startTime,
         day: formatDate(bs.timeRange.startTime),
         ownerId: bs.collaboratorId,
         ownerName: bs.collaboratorId === userId ? 'You' : 'Unknown', // Default to 'You' or 'Unknown'
@@ -86,6 +87,8 @@ const createWorksession = async (data: CreateWorksessionRequest) => {
     const token = await getToken();
     if (!token) throw new Error('No token found');
 
+    console.log('Creating worksession with data:', JSON.stringify(data, null, 2));
+
     const response = await fetch(`${API_URL}/worksessions`, {
         method: 'POST',
         headers: {
@@ -95,7 +98,11 @@ const createWorksession = async (data: CreateWorksessionRequest) => {
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) throw new Error('Failed to create worksession');
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Worksession creation error:', response.status, errorText);
+        throw new Error(`Failed to create worksession: ${response.status} - ${errorText}`);
+    }
     return response.json();
 };
 
