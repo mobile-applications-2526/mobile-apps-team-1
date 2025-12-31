@@ -1,11 +1,7 @@
 export interface User {
-  id: {
-    value: string;
-  };
+  id: string;
   username: string;
-  email: {
-    value: string;
-  };
+  email: string;
   profile?: Profile;
 }
 export interface Profile {

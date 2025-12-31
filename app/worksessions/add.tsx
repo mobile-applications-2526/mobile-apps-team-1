@@ -1,12 +1,17 @@
 import { useSession } from '@/app/context/AuthContext';
 import { getUserId } from '@/services/StorageService';
+import TaskService from '@/services/TaskService';
 import WorksessionService, { CreateWorksessionRequest } from '@/services/WorksessionService';
+import { Task } from '@/types';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    FlatList,
+    Modal,
     Platform,
     ScrollView,
     StyleSheet,
@@ -20,7 +25,9 @@ export default function AddWorksessionScreen() {
     const router = useRouter();
     const { session } = useSession();
     const [title, setTitle] = useState('');
-    const [taskId, setTaskId] = useState('');
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [showTaskSelector, setShowTaskSelector] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date(Date.now() + 3600000)); // 1 hour later
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -28,14 +35,27 @@ export default function AddWorksessionScreen() {
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [showEndTimePicker, setShowEndTimePicker] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [fetchingTasks, setFetchingTasks] = useState(true);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        const loadUserId = async () => {
-            const id = await getUserId();
-            setCurrentUserId(id);
+        const loadInitialData = async () => {
+            try {
+                setFetchingTasks(true);
+                const [id, fetchedTasks] = await Promise.all([
+                    getUserId(),
+                    TaskService.getTasks()
+                ]);
+                setCurrentUserId(id);
+                setTasks(fetchedTasks);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                Alert.alert('Error', 'Failed to load tasks. Using manual entry fallback.');
+            } finally {
+                setFetchingTasks(false);
+            }
         };
-        loadUserId();
+        loadInitialData();
     }, []);
 
     const formatDateTime = (date: Date): string => {
@@ -122,8 +142,8 @@ export default function AddWorksessionScreen() {
             return false;
         }
 
-        if (!taskId.trim()) {
-            Alert.alert('Validation Error', 'Please enter a task ID');
+        if (!selectedTask) {
+            Alert.alert('Validation Error', 'Please select a task');
             return false;
         }
 
@@ -154,22 +174,31 @@ export default function AddWorksessionScreen() {
                     startTime: toISOString(startDate),
                     endTime: toISOString(endDate),
                 },
-                subjectId: {
-                    value: taskId.trim(),
-                },
-                collaboratorId: {
-                    value: currentUserId!,
-                },
+                subjectId: selectedTask!.id,
+                collaboratorId: currentUserId!,
             };
 
             await WorksessionService.createWorksession(request);
 
-            Alert.alert('Success', 'Worksession created successfully', [
-                {
-                    text: 'OK',
-                    onPress: () => router.back(),
-                },
-            ]);
+            setLoading(false);
+
+            if (Platform.OS === 'web') {
+                alert('Worksession created successfully!');
+                router.replace('/(tabs)/calendar');
+                return;
+            }
+
+            Alert.alert(
+                'Success',
+                'Worksession created successfully',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => router.replace('/(tabs)/calendar'),
+                    },
+                ],
+                { cancelable: false }
+            );
         } catch (error) {
             console.error('Error creating worksession:', error);
             Alert.alert('Error', 'Failed to create worksession. Please try again.');
@@ -194,15 +223,60 @@ export default function AddWorksessionScreen() {
                     </View>
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Task ID *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={taskId}
-                            onChangeText={setTaskId}
-                            placeholder="Enter task ID"
-                            placeholderTextColor="#9CA3AF"
-                        />
+                        <Text style={styles.label}>Select Task *</Text>
+                        <TouchableOpacity
+                            style={styles.selectorButton}
+                            onPress={() => setShowTaskSelector(true)}
+                        >
+                            <Text style={[styles.selectorText, !selectedTask && styles.placeholderText]}>
+                                {selectedTask ? selectedTask.title : 'Choose a task'}
+                            </Text>
+                            <Feather name="chevron-down" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
                     </View>
+
+                    <Modal
+                        visible={showTaskSelector}
+                        animationType="slide"
+                        transparent={true}
+                        onRequestClose={() => setShowTaskSelector(false)}
+                    >
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Select Task</Text>
+                                    <TouchableOpacity onPress={() => setShowTaskSelector(false)}>
+                                        <AntDesign name="close" size={24} color="#374151" />
+                                    </TouchableOpacity>
+                                </View>
+                                {fetchingTasks ? (
+                                    <ActivityIndicator size="large" color="#2563EB" style={{ margin: 20 }} />
+                                ) : (
+                                    <FlatList
+                                        data={tasks}
+                                        keyExtractor={(item) => item.id}
+                                        renderItem={({ item }) => (
+                                            <TouchableOpacity
+                                                style={styles.taskItem}
+                                                onPress={() => {
+                                                    setSelectedTask(item);
+                                                    setShowTaskSelector(false);
+                                                }}
+                                            >
+                                                <Text style={styles.taskItemTitle}>{item.title}</Text>
+                                                {selectedTask?.id === item.id && (
+                                                    <AntDesign name="check" size={20} color="#2563EB" />
+                                                )}
+                                            </TouchableOpacity>
+                                        )}
+                                        ListEmptyComponent={
+                                            <Text style={styles.emptyText}>No tasks found</Text>
+                                        }
+                                    />
+                                )}
+                            </View>
+                        </View>
+                    </Modal>
 
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>Start Date & Time *</Text>
@@ -337,6 +411,68 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         color: '#111827',
+    },
+    selectorButton: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 8,
+        padding: 12,
+    },
+    selectorText: {
+        fontSize: 16,
+        color: '#111827',
+    },
+    placeholderText: {
+        color: '#9CA3AF',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        minHeight: '40%',
+        maxHeight: '80%',
+        padding: 16,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#111827',
+    },
+    taskItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    taskItemTitle: {
+        fontSize: 16,
+        color: '#374151',
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: '#9CA3AF',
+        marginTop: 20,
+        fontSize: 16,
     },
     dateTimeRow: {
         flexDirection: 'row',
