@@ -1,23 +1,35 @@
 import SessionCard from '@/components/SessionCard';
 import { AntDesign, Feather } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { api } from '../../services/api';
 import { DaySessionGroup } from '../../types';
+
+// Helper function to get Monday of the week for a given date
+const getMonday = (date: Date): Date => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    return new Date(d.setDate(diff));
+};
 
 export default function CalendarScreen() {
     const [schedule, setSchedule] = useState<DaySessionGroup[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getMonday(new Date()));
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [currentWeekStart]);
 
     const loadData = async () => {
         try {
-            const data = await api.getWeekSchedule();
+            setLoading(true);
+            const data = await api.getWeekSchedule(currentWeekStart);
             setSchedule(data);
         } catch (error) {
             console.error(error);
@@ -31,6 +43,34 @@ export default function CalendarScreen() {
         return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     };
 
+    const formatWeekRange = () => {
+        const weekEnd = new Date(currentWeekStart);
+        weekEnd.setDate(currentWeekStart.getDate() + 6);
+
+        const formatShort = (date: Date) => {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        };
+
+        return `${formatShort(currentWeekStart)} - ${formatShort(weekEnd)}`;
+    };
+
+    const navigateWeek = (direction: 'prev' | 'next') => {
+        const newWeekStart = new Date(currentWeekStart);
+        newWeekStart.setDate(currentWeekStart.getDate() + (direction === 'next' ? 7 : -7));
+        setCurrentWeekStart(newWeekStart);
+    };
+
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(Platform.OS === 'ios'); // Keep open on iOS, close on Android
+        if (selectedDate) {
+            const monday = getMonday(selectedDate);
+            setCurrentWeekStart(monday);
+        }
+    };
+
     if (loading) {
         return (
             <View style={styles.center}>
@@ -42,19 +82,36 @@ export default function CalendarScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <View style={styles.headerTop}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <AntDesign name="left" size={20} color="#4B5563" />
+                <Text style={styles.headerTitle}>Calendar</Text>
+                <View style={styles.weekNavigation}>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                        <Text style={styles.weekRange}>{formatWeekRange()}</Text>
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>December 2024</Text>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <AntDesign name="right" size={20} color="#4B5563" />
-                    </TouchableOpacity>
+                    <View style={styles.navigationButtons}>
+                        <TouchableOpacity
+                            style={styles.navButton}
+                            onPress={() => navigateWeek('prev')}
+                        >
+                            <AntDesign name="left" size={20} color="#4B5563" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.navButton}
+                            onPress={() => navigateWeek('next')}
+                        >
+                            <AntDesign name="right" size={20} color="#4B5563" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <TouchableOpacity style={styles.todayButton}>
-                    <Text style={styles.todayButtonText}>Today</Text>
-                </TouchableOpacity>
             </View>
+
+            {showDatePicker && (
+                <DateTimePicker
+                    value={currentWeekStart}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onDateChange}
+                />
+            )}
 
             <ScrollView style={styles.content}>
                 <View style={styles.scheduleContainer}>
@@ -122,29 +179,29 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
     },
-    headerTop: {
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: 8,
+    },
+    weekNavigation: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 8,
     },
-    iconButton: {
-        padding: 4,
+    weekRange: {
+        fontSize: 16,
+        color: '#4B5563',
+    },
+    navigationButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    navButton: {
+        padding: 8,
         borderRadius: 4,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    todayButton: {
-        alignItems: 'center',
-        paddingVertical: 4,
-    },
-    todayButtonText: {
-        color: '#2563EB',
-        fontSize: 14,
-        fontWeight: '500',
+        backgroundColor: '#F3F4F6',
     },
     content: {
         flex: 1,

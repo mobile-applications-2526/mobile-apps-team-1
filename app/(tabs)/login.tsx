@@ -5,24 +5,22 @@ import { Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } 
 import { getToken } from '../../services/StorageService';
 
 const showAlert = (message: string, onConfirm?: () => void) => {
-  if (onConfirm) {
-    // Confirm dialog
-    if (Platform.OS === 'web') {
-      if (window.confirm(message)) onConfirm();
+    if (onConfirm) {
+        if (Platform.OS === 'web') {
+            if (window.confirm(message)) onConfirm();
+        } else {
+            Alert.alert(
+                message,
+                '',
+                [
+                    { text: 'Nee', style: 'cancel' },
+                    { text: 'Ja', onPress: onConfirm },
+                ]
+            );
+        }
     } else {
-      Alert.alert(
-        message,
-        '',
-        [
-          { text: 'Nee', style: 'cancel' },
-          { text: 'Ja', onPress: onConfirm },
-        ]
-      );
+        Platform.OS === 'web' ? window.alert(message) : Alert.alert(message);
     }
-  } else {
-    // Simple alert
-    Platform.OS === 'web' ? window.alert(message) : Alert.alert(message);
-  }
 };
 
 export default function LoginScreen() {
@@ -30,17 +28,14 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [checkingToken, setCheckingToken] = useState(true); // voor loading terwijl we checken
+    const [checkingToken, setCheckingToken] = useState(true);
 
-    // Check bij mount of er al een token is
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
                 const token = await getToken();
                 if (token) {
                     setIsLoggedIn(true);
-                    // Optioneel: direct doorsturen naar profile als je wil
-                    // router.replace("/(tabs)/profile");
                 }
             } catch (error) {
                 console.log("Geen token gevonden of error:", error);
@@ -74,7 +69,7 @@ export default function LoginScreen() {
     };
 
     const confirmLogout = () => {
-    showAlert('Weet je het zeker niffo?', handleLogout);
+        showAlert('Weet je het zeker niffo?', handleLogout);
     };
 
     const handleLogout = async () => {
@@ -117,7 +112,7 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Login</Text>
-            
+
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -126,7 +121,7 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
-            
+
             <TextInput
                 style={styles.input}
                 placeholder="Password"
@@ -134,9 +129,9 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            
-            <TouchableOpacity 
-                style={styles.button} 
+
+            <TouchableOpacity
+                style={styles.button}
                 onPress={handleLogin}
                 disabled={loading}
             >
