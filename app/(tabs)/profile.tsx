@@ -2,24 +2,68 @@ import { AntDesign, Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 import { User } from '@/types';
 import { getUserId } from '../../services/StorageService';
 import UserService from '../../services/UserService';
 
+import { useNavigation } from '@react-navigation/native';
+import { useSession } from '../context/AuthContext';
+
 export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { signOut } = useSession();
+  const navigation = useNavigation<any>();
+
   useEffect(() => {
     loadUser();
   }, []);
+
+    const showAlert = (message: string, onConfirm?: () => void) => {
+    if (onConfirm) {
+      if (Platform.OS === 'web') {
+        if (window.confirm(message)) onConfirm();
+      } else {
+        Alert.alert(
+          message,
+          '',
+          [
+            { text: 'Nee', style: 'cancel' },
+            { text: 'Ja', onPress: onConfirm },
+          ]
+        );
+      }
+    } else {
+      Platform.OS === 'web' ? window.alert(message) : Alert.alert(message);
+    }
+  };
+
+  const handleLogout = () => {
+    showAlert(
+      'Weet je zeker dat je wilt uitloggen?',
+      async () => {
+        try {
+          await signOut();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }], // pas aan als nodig
+          });
+        } catch (error) {
+          showAlert('Fout');
+        }
+      }
+    );
+  };
 
   const loadUser = async () => {
     try {
@@ -48,15 +92,21 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Profile</Text>
+    <View style={styles.header}>
+      <View style={styles.headerTop}>
+        {/* Header – alles goed hierbinnen */}
+        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.settingsButton}>
             <Feather name="settings" size={24} color="#4B5563" />
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Feather name="log-out" size={24} color="#EF4444" />
+          </TouchableOpacity>
         </View>
       </View>
-
+    </View>
       <ScrollView style={styles.content}>
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
@@ -65,7 +115,7 @@ export default function ProfileScreen() {
             </View>
 
             <Text style={styles.name}>{user.username}</Text>
-            <Text style={styles.email}>{user.email.value}</Text>
+            <Text style={styles.email}>{user.email}</Text>
           </View>
 
           <View style={styles.divider} />
@@ -187,5 +237,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginTop: 4,
+  },
+    headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  logoutButton: {
+    padding: 4,
   },
 });
