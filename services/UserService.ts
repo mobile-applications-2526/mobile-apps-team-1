@@ -1,6 +1,6 @@
 import { getToken } from './StorageService';
 
-const apiUrl = "http://localhost:8080/users";
+const apiUrl = "http://cedvinvu.be/users";
 
 
 const getUserById = async (id: string) => {

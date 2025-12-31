@@ -1,7 +1,7 @@
 // services/LoginService.ts
 import { getToken, removeToken, removeUserId, setToken, setUserId } from './StorageService';
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://cedvinvu.be";
 
 const login = async (email: string, password: string) => {
     const response = await fetch(apiUrl + '/users/login', {
