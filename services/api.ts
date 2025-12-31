@@ -1,14 +1,13 @@
 import { DaySessionGroup, Peer, Task, WorkSession } from '../types';
-import { CURRENT_USER, MOCK_PEERS, MOCK_SESSIONS, MOCK_TASKS, MOCK_WEEK_DAYS } from './mockData';
+import { MOCK_PEERS, MOCK_SESSIONS, MOCK_TASKS, MOCK_WEEK_DAYS } from './mockData';
 
-const DELAY = 500; // Simulate network latency
+const DELAY = 500; // Simulate network latency 
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const api = {
   getUser: async () => {
     await delay(DELAY);
-    return CURRENT_USER;
   },
 
   getTasks: async (filter?: 'all' | 'completed' | 'active'): Promise<Task[]> => {

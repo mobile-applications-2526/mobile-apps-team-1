@@ -1,10 +1,18 @@
 export interface User {
-  id: string;
-  name: string;
-  education: string;
-  avatarUrl?: string; // For future use
+  id: {
+    value: string;
+  };
+  username: string;
+  email: {
+    value: string;
+  };
+  profile?: Profile;
 }
-
+export interface Profile {
+  bio: string;
+  studyProgram: string;
+  yearOfStudy: number;
+}
 export interface Task {
   id: string;
   title: string;

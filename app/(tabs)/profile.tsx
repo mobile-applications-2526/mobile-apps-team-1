@@ -1,23 +1,35 @@
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { api } from '../../services/api';
-import { User } from '../../types';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { User } from '@/types';
+import { getUserId } from '../../services/StorageService';
+import UserService from '../../services/UserService';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    loadUser();
   }, []);
 
-  const loadData = async () => {
+  const loadUser = async () => {
     try {
-      const data = await api.getUser();
+      const userId = await getUserId();
+      if (!userId) throw new Error('User not logged in');
+
+      const data = await UserService.getUserById(userId);
       setUser(data);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to load profile', error);
     } finally {
       setLoading(false);
     }
@@ -25,20 +37,23 @@ export default function ProfileScreen() {
 
   if (loading || !user) {
     return (
-        <View style={styles.center}>
-            <ActivityIndicator size="large" color="#2563EB" />
-        </View>
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
     );
   }
 
+  const profile = user.profile;
+
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-            <Text style={styles.headerTitle}>Profile</Text>
-            <TouchableOpacity style={styles.settingsButton}>
-                <Feather name="settings" size={24} color="#4B5563" />
-            </TouchableOpacity>
+          <Text style={styles.headerTitle}>Profile</Text>
+          <TouchableOpacity style={styles.settingsButton}>
+            <Feather name="settings" size={24} color="#4B5563" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -46,30 +61,32 @@ export default function ProfileScreen() {
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
             <View style={styles.avatar}>
-               <AntDesign name="user" size={40} color="#4B5563" />
+              <AntDesign name="user" size={40} color="#4B5563" />
             </View>
-            <Text style={styles.name}>{user.name}</Text>
-            <Text style={styles.education}>{user.education}</Text>
+
+            <Text style={styles.name}>{user.username}</Text>
+            <Text style={styles.email}>{user.email.value}</Text>
           </View>
-          
+
           <View style={styles.divider} />
-          
+
           <Text style={styles.bio}>
-            Third-year CS student focusing on software engineering and AI. Always looking for study partners!
+            {profile?.bio ?? 'No bio yet'}
           </Text>
-          
+
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>12</Text>
-              <Text style={styles.statLabel}>Active Tasks</Text>
+              <Text style={styles.statValue}>
+                {profile?.studyProgram ?? '-'}
+              </Text>
+              <Text style={styles.statLabel}>Study Program</Text>
             </View>
+
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>48</Text>
-              <Text style={styles.statLabel}>Hours Logged</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>8</Text>
-              <Text style={styles.statLabel}>Study Sessions</Text>
+              <Text style={styles.statValue}>
+                {profile?.yearOfStudy ?? '-'}
+              </Text>
+              <Text style={styles.statLabel}>Year</Text>
             </View>
           </View>
         </View>
@@ -78,15 +95,16 @@ export default function ProfileScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
   center: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     backgroundColor: 'white',
@@ -95,9 +113,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerTop: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 24,
@@ -105,7 +123,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   settingsButton: {
-      padding: 4,
+    padding: 4,
   },
   content: {
     flex: 1,
@@ -137,7 +155,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 4,
   },
-  education: {
+  email: {
     fontSize: 14,
     color: '#6B7280',
   },
@@ -150,7 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4B5563',
     textAlign: 'center',
-    marginBottom: 24,
     lineHeight: 20,
   },
   statsContainer: {

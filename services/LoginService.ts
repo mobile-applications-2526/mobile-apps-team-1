@@ -1,7 +1,7 @@
 // services/LoginService.ts
-import { getToken, removeToken, setToken } from './StorageService';
+import { getToken, removeToken, removeUserId, setToken, setUserId } from './StorageService';
 
-const apiUrl = "http://cedvinvu.be";
+const apiUrl = "http://localhost:8080";
 
 const login = async (email: string, password: string) => {
     const response = await fetch(apiUrl + '/users/login', {
@@ -21,7 +21,8 @@ const login = async (email: string, password: string) => {
     console.log("ik ben de token: " + data.token);
 
     await setToken(data.token); // <-- hier
-
+    await setUserId(data.userId);
+    
     const check = await getToken();
     console.log("Direct gecheckt:", check);
 
@@ -30,6 +31,7 @@ const login = async (email: string, password: string) => {
 
 const logout = async () => {
     await removeToken();
+    await removeUserId();
 };
 
 const LoginService = {

@@ -1,10 +1,10 @@
-import { Peer, Task, User, WorkSession } from '../types';
+import { Peer, Task, WorkSession } from '../types';
 
-export const CURRENT_USER: User = {
-  id: 'u1',
-  name: 'Alex Chen',
-  education: 'Computer Science, KU Leuven',
-};
+// export const CURRENT_USER: User = {
+//   id: 'u1',
+//   name: 'Alex Chen',
+//   education: 'Computer Science, KU Leuven',
+// };
 
 export const MOCK_TASKS: Task[] = [
   { id: '1', title: 'Complete Database Assignment', deadline: '2025-01-05', progress: 60, completed: false, pastDue: false },

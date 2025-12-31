@@ -27,3 +27,29 @@ export const removeToken = async () => {
         await SecureStore.deleteItemAsync(STORAGE_KEY);
     }
 };
+
+const USER_ID_KEY = 'userId';
+
+export const setUserId = async (userId: string) => {
+    if (Platform.OS === 'web') {
+        await AsyncStorage.setItem(USER_ID_KEY, userId);
+    } else {
+        await SecureStore.setItemAsync(USER_ID_KEY, userId);
+    }
+};
+
+export const getUserId = async (): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+        return await AsyncStorage.getItem(USER_ID_KEY);
+    } else {
+        return await SecureStore.getItemAsync(USER_ID_KEY);
+    }
+};
+
+export const removeUserId = async () => {
+    if (Platform.OS === 'web') {
+        await AsyncStorage.removeItem(USER_ID_KEY);
+    } else {
+        await SecureStore.deleteItemAsync(USER_ID_KEY);
+    }
+};

@@ -1,8 +1,29 @@
 import LoginService from '@/services/LoginService';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { getToken } from '../../services/StorageService';
+
+const showAlert = (message: string, onConfirm?: () => void) => {
+  if (onConfirm) {
+    // Confirm dialog
+    if (Platform.OS === 'web') {
+      if (window.confirm(message)) onConfirm();
+    } else {
+      Alert.alert(
+        message,
+        '',
+        [
+          { text: 'Nee', style: 'cancel' },
+          { text: 'Ja', onPress: onConfirm },
+        ]
+      );
+    }
+  } else {
+    // Simple alert
+    Platform.OS === 'web' ? window.alert(message) : Alert.alert(message);
+  }
+};
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -52,30 +73,21 @@ export default function LoginScreen() {
         }
     };
 
+    const confirmLogout = () => {
+    showAlert('Weet je het zeker niffo?', handleLogout);
+    };
+
     const handleLogout = async () => {
-        Alert.alert(
-            'Logout',
-            'Weet je het zeker niffo?',
-            [
-                { text: 'Nee', style: 'cancel' },
-                {
-                    text: 'Ja',
-                    onPress: async () => {
-                        try {
-                            await LoginService.logout();
-                            setIsLoggedIn(false);
-                            setEmail('');
-                            setPassword('');
-                            Alert.alert('Success', 'Uitgelogd, tot later mattie 👋');
-                            // Optioneel: terug naar login tab
-                            router.replace("/(tabs)/login");
-                        } catch (error) {
-                            Alert.alert('Error', 'Logout mislukt lmao');
-                        }
-                    },
-                },
-            ]
-        );
+        try {
+            await LoginService.logout();
+            setIsLoggedIn(false);
+            setEmail('');
+            setPassword('');
+            Alert.alert('Success', 'Uitgelogd, tot later mattie 👋');
+            router.replace("/(tabs)/login");
+        } catch (error) {
+            Alert.alert('Error', 'Logout mislukt lmao');
+        }
     };
 
     // Loading terwijl we token checken
@@ -94,7 +106,7 @@ export default function LoginScreen() {
                 <Text style={styles.title}>Je bent al ingelogd niffo ✅</Text>
                 <Text style={styles.subtitle}>Lekker aan het chillen in de app</Text>
 
-                <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                <TouchableOpacity style={styles.button} onPress={confirmLogout}>
                     <Text style={styles.buttonText}>Logout</Text>
                 </TouchableOpacity>
             </View>
