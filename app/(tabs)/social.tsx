@@ -3,7 +3,7 @@ import PeerCard from '@/components/PeerCard';
 import { api } from '@/services/api';
 import { Peer } from '@/types';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function SocialScreen() {

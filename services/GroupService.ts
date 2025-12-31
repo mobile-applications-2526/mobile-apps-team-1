@@ -27,6 +27,7 @@ const getGroups = async () => {
     return response.json();
 };
 
+// Voor later
 const createGroup = async () => {
     const response = await fetch(apiUrl + '/groups/create', {
         method: 'POST',
@@ -42,6 +43,7 @@ const createGroup = async () => {
     return response.json();
 };
 
+// Voor later
 const updateGroup = async () => {
     const response = await fetch(apiUrl + '/groups/update', {
         method: 'PUT',
