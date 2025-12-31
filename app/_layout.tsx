@@ -1,7 +1,8 @@
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { SessionProvider, useSession } from './context/AuthContext';
+import { Stack, useRouter, useSegments } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { SessionProvider, useSession } from "./context/AuthContext";
+import { TasksProvider } from "./context/TasksContext";
 
 function InitialLayout() {
   const { session, isLoading } = useSession();
@@ -11,20 +12,20 @@ function InitialLayout() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const inAuthGroup = segments[0] === "(auth)";
 
     if (!session && !inAuthGroup) {
       // Redirect to the sign-in page.
-      router.replace('/(auth)/login');
+      router.replace("/(auth)/login");
     } else if (session && inAuthGroup) {
       // Redirect away from the sign-in page.
-      router.replace('/');
+      router.replace("/");
     }
   }, [session, segments, isLoading]);
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -42,8 +43,10 @@ function InitialLayout() {
 
 export default function RootLayout() {
   return (
-    <SessionProvider>
-      <InitialLayout />
-    </SessionProvider>
+    <TasksProvider>
+      <SessionProvider>
+        <InitialLayout />
+      </SessionProvider>
+    </TasksProvider>
   );
 }

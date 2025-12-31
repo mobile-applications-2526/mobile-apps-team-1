@@ -9,13 +9,22 @@ export interface Profile {
   studyProgram: string;
   yearOfStudy: number;
 }
+export interface Subtask {
+  id: string;
+  title: string;
+  status: "TODO" | "DOING" | "DONE" | "EXPIRED";
+}
+
 export interface Task {
   id: string;
   title: string;
-  deadline: string;
-  progress: number;
-  completed: boolean;
-  pastDue: boolean;
+  status: "TODO" | "DOING" | "DONE" | "EXPIRED";
+  assignee: string;
+  subtasks: Subtask[];
+  deadline?: string;
+  progress?: number;
+  completed?: boolean;
+  pastDue?: boolean;
   description?: string;
 }
 
@@ -35,7 +44,7 @@ export interface Peer {
   name: string;
   education?: string;
   members?: number;
-  type: 'friend' | 'group' | 'person';
+  type: "friend" | "group" | "person";
 }
 
 export interface DaySessionGroup {
@@ -58,5 +67,15 @@ export interface BackendGroup {
   members: {
     userId: string;
     role: string;
+  }[];
+}
+export interface UpdateTaskDTO {
+  id: string;
+  title: string;
+  status: "TODO" | "DOING" | "DONE" | "EXPIRED";
+  subtasks: {
+    id: string;
+    title: string;
+    status: "TODO" | "DOING" | "DONE" | "EXPIRED";
   }[];
 }
