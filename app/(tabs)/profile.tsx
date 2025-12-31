@@ -15,7 +15,6 @@ import { User } from '@/types';
 import { getUserId } from '../../services/StorageService';
 import UserService from '../../services/UserService';
 
-import { useNavigation } from '@react-navigation/native';
 import { useSession } from '../context/AuthContext';
 
 export default function ProfileScreen() {
@@ -23,13 +22,12 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
 
   const { signOut } = useSession();
-  const navigation = useNavigation<any>();
 
   useEffect(() => {
     loadUser();
   }, []);
 
-    const showAlert = (message: string, onConfirm?: () => void) => {
+  const showAlert = (message: string, onConfirm?: () => void) => {
     if (onConfirm) {
       if (Platform.OS === 'web') {
         if (window.confirm(message)) onConfirm();
@@ -54,10 +52,7 @@ export default function ProfileScreen() {
       async () => {
         try {
           await signOut();
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }], // pas aan als nodig
-          });
+          // Navigation is handled automatically by the auth context in _layout.tsx
         } catch (error) {
           showAlert('Fout');
         }
@@ -92,21 +87,21 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-    <View style={styles.header}>
-      <View style={styles.headerTop}>
-        {/* Header – alles goed hierbinnen */}
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.settingsButton}>
-            <Feather name="settings" size={24} color="#4B5563" />
-          </TouchableOpacity>
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          {/* Header – alles goed hierbinnen */}
+          <Text style={styles.headerTitle}>Profile</Text>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.settingsButton}>
+              <Feather name="settings" size={24} color="#4B5563" />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Feather name="log-out" size={24} color="#EF4444" />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Feather name="log-out" size={24} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
       <ScrollView style={styles.content}>
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
@@ -238,7 +233,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
   },
-    headerButtons: {
+  headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,

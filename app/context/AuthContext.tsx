@@ -75,3 +75,4 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         </AuthContext.Provider>
     );
 }
+export default SessionProvider;

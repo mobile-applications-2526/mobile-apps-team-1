@@ -1,7 +1,8 @@
 import { WorkSession } from '../types';
+import { API_URL } from './Config';
 import { getToken, getUserId } from './StorageService';
 
-const API_URL = "http://cedvinvu.be";
+const apiUrl = API_URL;
 
 interface BackendWorksession {
     id: string;
