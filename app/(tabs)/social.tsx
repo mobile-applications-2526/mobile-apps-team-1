@@ -1,6 +1,7 @@
 import FilterBadge from '@/components/FilterBadge';
 import PeerCard from '@/components/PeerCard';
-import { api } from '@/services/api';
+import GroupService from '@/services/GroupService';
+import UserService from '@/services/UserService';
 import { Peer } from '@/types';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -18,8 +19,12 @@ export default function SocialScreen() {
 
   const loadData = async () => {
     try {
-      const data = await api.getPeers(); // In a real app we might fetch friends specifically
-      setItems(data);
+      const data = await UserService.getUsers();
+      const data2 = await GroupService.getGroups();
+      const allPeers = [...data, ...data2];
+      console.log(data);
+      console.log(data2);
+      setItems(allPeers);
     } catch (error) {
       console.error(error);
     } finally {

@@ -1,7 +1,20 @@
+import { BackendGroup, Peer } from '@/types';
 import { getToken } from './StorageService';
 
 const apiUrl = "http://cedvinvu.be";
 
+export function mapGroupToPeer(group: BackendGroup): Peer {
+  return {
+    id: group.id,
+    name: group.name,
+    members: group.members.length,
+    type: 'group' as const,
+  };
+}
+
+export function mapGroupsToPeers(groups: BackendGroup[]): Peer[] {
+  return groups.map(mapGroupToPeer);
+}
 
 const getGroups = async () => {
     const token = await getToken();
@@ -24,7 +37,8 @@ const getGroups = async () => {
         throw new Error('Failed to fetch groups lmao');
     }
 
-    return response.json();
+    const backendGroups = await response.json();
+    return mapGroupsToPeers(backendGroups);
 };
 
 // Voor later
