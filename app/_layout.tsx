@@ -1,6 +1,7 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SessionProvider, useSession } from "./context/AuthContext";
 import { TasksProvider } from "./context/TasksContext";
 
@@ -32,21 +33,25 @@ function InitialLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="details" options={{ headerShown: false }} />
-      <Stack.Screen name="worksessions" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-    </Stack>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="details" options={{ headerShown: false }} />
+        <Stack.Screen name="worksessions" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack>
+    </SafeAreaView>
   );
 }
 
 export default function RootLayout() {
   return (
-    <TasksProvider>
-      <SessionProvider>
-        <InitialLayout />
-      </SessionProvider>
-    </TasksProvider>
+    <SafeAreaProvider>
+      <TasksProvider>
+        <SessionProvider>
+          <InitialLayout />
+        </SessionProvider>
+      </TasksProvider>
+    </SafeAreaProvider>
   );
 }
