@@ -3,8 +3,8 @@ import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import { useSession } from '../context/AuthContext';
 
 export default function LoginScreen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('alice@example.com');
+    const [password, setPassword] = useState('password123');
     const { signIn, session, isLoading } = useSession();
 
     const handleLogin = async () => {
