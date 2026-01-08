@@ -62,6 +62,13 @@ export interface BackendUser {
   profile?: any;
 }
 
+export interface GroupMember {
+  userId: string;
+  username: string;
+  role: string;
+  profilePicture?: string;
+}
+
 export interface BackendGroup {
   id: string;
   name: string;
@@ -69,6 +76,12 @@ export interface BackendGroup {
     userId: string;
     role: string;
   }[];
+}
+
+export interface GroupDetail {
+  id: string;
+  name: string;
+  members: GroupMember[];
 }
 export interface UpdateTaskDTO {
   id: string;

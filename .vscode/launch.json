@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-PeerPlanApplication<PeerPlan>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "be.ucll.craftsmanship.team11.PeerPlan.PeerPlanApplication",
+            "projectName": "PeerPlan",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

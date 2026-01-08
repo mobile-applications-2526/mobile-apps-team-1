@@ -10,6 +10,7 @@ import { Peer } from '../../types';
 export default function SearchScreen() {
   const [items, setItems] = useState<Peer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState<'all' | 'person' | 'group'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
@@ -20,12 +21,20 @@ export default function SearchScreen() {
 
   const loadData = async () => {
     try {
+      console.log('Loading users...');
       const data = await UserService.getUsers();
+      console.log('Users loaded:', data);
+      
+      console.log('Loading groups...');
       const data2 = await GroupService.getGroups();
+      console.log('Groups loaded:', data2);
+      
       const allPeers = [...data, ...data2];
+      console.log('All peers:', allPeers);
       setItems(allPeers);
     } catch (error) {
-      console.error(error);
+      console.error('Error loading data:', error);
+      setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }
@@ -42,6 +51,14 @@ export default function SearchScreen() {
     return (
         <View style={styles.center}>
             <ActivityIndicator size="large" color="#2563EB" />
+        </View>
+    );
+  }
+
+  if (error) {
+    return (
+        <View style={styles.center}>
+            <Text style={styles.errorText}>{error}</Text>
         </View>
     );
   }
@@ -135,5 +152,11 @@ const styles = StyleSheet.create({
   emptyStateText: {
     color: '#6B7280',
     fontSize: 16,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 16,
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
 });
