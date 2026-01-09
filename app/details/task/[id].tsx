@@ -96,17 +96,6 @@ export default function TaskDetailScreen() {
                     {subtask.title}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.detailsButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/details/subtask/[id]",
-                      params: { id: subtask.id },
-                    })
-                  }
-                >
-                  <Text style={styles.detailsText}>Details</Text>
-                </TouchableOpacity>
               </View>
             )
         )}
