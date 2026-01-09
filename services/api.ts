@@ -1,5 +1,7 @@
 import { DaySessionGroup, Peer, Task, WorkSession } from '../types';
-import { MOCK_PEERS, MOCK_TASKS } from './mockData';
+import GroupService from './GroupService';
+import TaskService from './TaskService';
+import UserService from './UserService';
 import WorksessionService from './WorksessionService';
 
 const DELAY = 500; // Simulate network latency 
@@ -12,14 +14,20 @@ export const api = {
   },
 
   getTasks: async (filter?: 'all' | 'completed' | 'active'): Promise<Task[]> => {
-    await delay(DELAY);
-    if (!filter || filter === 'all') return MOCK_TASKS;
-    return MOCK_TASKS.filter(t => filter === 'completed' ? t.completed : !t.completed);
+    // Fetch tasks from backend and apply filter client-side
+    try {
+      const tasks = await TaskService.getTasks();
+      if (!filter || filter === 'all') return tasks;
+      return tasks.filter(t => (filter === 'completed' ? t.completed : !t.completed));
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      return [];
+    }
   },
 
   getSessions: async (dayKey?: string): Promise<WorkSession[]> => {
     try {
-      const sessions = await WorksessionService.getMyWorksessions();
+      const sessions = await WorksessionService.getWorksessions();
       if (!dayKey) return sessions;
       return sessions.filter(s => s.day === dayKey);
     } catch (error) {
@@ -32,7 +40,7 @@ export const api = {
     // Fetch all sessions first
     let allSessions: WorkSession[] = [];
     try {
-      allSessions = await WorksessionService.getMyWorksessions();
+      allSessions = await WorksessionService.getWorksessions();
     } catch (error) {
       console.error("Error fetching sessions in getWeekSchedule:", error);
       // Fallback to empty or could throw
@@ -70,14 +78,29 @@ export const api = {
   },
 
   getPeers: async (typeFilter?: 'all' | 'friend' | 'group'): Promise<Peer[]> => {
-    await delay(DELAY);
-    if (!typeFilter || typeFilter === 'all') return MOCK_PEERS;
-    return MOCK_PEERS.filter(p => p.type === typeFilter);
+    // Fetch peers (users as persons, groups) from backend
+    try {
+      const [users, groups] = await Promise.all([
+        UserService.getUsers(),
+        GroupService.getGroups()
+      ]);
+
+      let peers: Peer[] = [...users, ...groups];
+
+      if (!typeFilter || typeFilter === 'all') return peers;
+
+      // Temporary handling: treat 'friend' filter as 'person' until friendship feature exists
+      const normalizedFilter = typeFilter === 'friend' ? 'person' : typeFilter;
+      return peers.filter(p => p.type === normalizedFilter);
+    } catch (error) {
+      console.error('Error fetching peers:', error);
+      return [];
+    }
   },
 
   getSession: async (id: string): Promise<WorkSession | undefined> => {
     try {
-      const sessions = await WorksessionService.getMyWorksessions();
+      const sessions = await WorksessionService.getWorksessions();
       return sessions.find(s => s.id === id);
     } catch (error) {
       console.error(error);
