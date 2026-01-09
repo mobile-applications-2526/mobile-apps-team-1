@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -20,6 +22,9 @@ import { useSession } from '../context/AuthContext';
 export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [editingUsername, setEditingUsername] = useState('');
+  const [updatingUser, setUpdatingUser] = useState(false);
 
   const { signOut } = useSession();
 
@@ -75,6 +80,35 @@ export default function ProfileScreen() {
     }
   };
 
+  const openSettingsModal = () => {
+    if (user) {
+      setEditingUsername(user.username);
+      setShowSettingsModal(true);
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!user) return;
+
+    if (!editingUsername.trim()) {
+      Alert.alert('Validation Error', 'Username cannot be empty');
+      return;
+    }
+
+    try {
+      setUpdatingUser(true);
+      await UserService.updateUser(user.id, editingUsername.trim());
+      setUser({ ...user, username: editingUsername.trim() });
+      setShowSettingsModal(false);
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      Alert.alert('Error', 'Failed to update profile');
+    } finally {
+      setUpdatingUser(false);
+    }
+  };
+
   if (loading || !user) {
     return (
       <View style={styles.center}>
@@ -93,7 +127,7 @@ export default function ProfileScreen() {
           {/* Header – alles goed hierbinnen */}
           <Text style={styles.headerTitle}>Profile</Text>
           <View style={styles.headerButtons}>
-            <TouchableOpacity style={styles.settingsButton}>
+            <TouchableOpacity style={styles.settingsButton} onPress={openSettingsModal}>
               <Feather name="settings" size={24} color="#4B5563" />
             </TouchableOpacity>
 
@@ -137,6 +171,59 @@ export default function ProfileScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showSettingsModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowSettingsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowSettingsModal(false)}>
+                <AntDesign name="close" size={24} color="#374151" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalForm}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Username</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingUsername}
+                  onChangeText={setEditingUsername}
+                  placeholder="Enter your username"
+                  placeholderTextColor="#9CA3AF"
+                  editable={!updatingUser}
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowSettingsModal(false)}
+                disabled={updatingUser}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveButton, updatingUser && styles.buttonDisabled]}
+                onPress={handleUpdateUser}
+                disabled={updatingUser}
+              >
+                {updatingUser ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -241,5 +328,86 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     padding: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 30,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  modalForm: {
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#111827',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });

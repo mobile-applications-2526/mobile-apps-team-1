@@ -1,6 +1,6 @@
 import { BackendGroup, GroupDetail, GroupMember, Peer } from '@/types';
 import { API_URL } from './Config';
-import { getToken } from './StorageService';
+import { getToken, getUserId } from './StorageService';
 
 const apiUrl = API_URL;
 
@@ -40,6 +40,43 @@ const getGroups = async () => {
 
     const backendGroups = await response.json();
     return mapGroupsToPeers(backendGroups);
+};
+
+const getUserGroups = async () => {
+    const token = await getToken();
+    const userId = await getUserId();
+
+    if (!token) {
+        throw new Error('No token found, retry login');
+    }
+
+    if (!userId) {
+        console.warn("No userId found in storage");
+        return [];
+    }
+
+    const response = await fetch(apiUrl + '/groups', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Groups error:", errorText);
+        throw new Error('Failed to fetch groups');
+    }
+
+    const backendGroups = await response.json();
+    
+    // Filter groups where the user is a member
+    const userGroups = backendGroups.filter((group: BackendGroup) => 
+        group.members.some(member => member.userId === userId)
+    );
+    
+    return mapGroupsToPeers(userGroups);
 };
 
 // Voor later
@@ -163,10 +200,78 @@ const getGroupWithMembers = async (id: string): Promise<GroupDetail> => {
     };
 };
 
+const addMemberToGroup = async (groupId: string, userId: string): Promise<void> => {
+    const token = await getToken();
+
+    if (!token) {
+        throw new Error('No token found, retry login');
+    }
+
+    const response = await fetch(`${apiUrl}/groups/addMember`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ groupId, userId }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Add member error:", errorText);
+        throw new Error('Failed to add member to group');
+    }
+};
+
+const removeMemberFromGroup = async (groupId: string, userId: string): Promise<void> => {
+    const token = await getToken();
+
+    if (!token) {
+        throw new Error('No token found, retry login');
+    }
+
+    const response = await fetch(`${apiUrl}/groups/removeMember`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ groupId, userId }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Remove member error:", errorText);
+        throw new Error('Failed to remove member from group');
+    }
+};
+
+const getCurrentUserRoleInGroup = async (groupId: string): Promise<string | null> => {
+    const token = await getToken();
+    const userId = await require('./StorageService').getUserId();
+
+    if (!token || !userId) {
+        return null;
+    }
+
+    try {
+        const data = await getGroupWithMembers(groupId);
+        const member = data.members.find(m => m.userId === userId);
+        return member?.role || null;
+    } catch (err) {
+        console.error('Failed to get user role in group:', err);
+        return null;
+    }
+};
+
 const GroupService = {
     getGroups,
+    getUserGroups,
     getGroupById,
     getGroupWithMembers,
+    addMemberToGroup,
+    removeMemberFromGroup,
+    getCurrentUserRoleInGroup,
     createGroup,
     updateGroup,
 };

@@ -20,7 +20,7 @@ export default function SocialScreen() {
   const loadData = async () => {
     try {
       const data = await UserService.getUsers();
-      const data2 = await GroupService.getGroups();
+      const data2 = await GroupService.getUserGroups();
       const allPeers = [...data, ...data2];
       setItems(allPeers);
     } catch (error) {

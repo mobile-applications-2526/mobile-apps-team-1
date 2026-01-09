@@ -74,9 +74,35 @@ const getUserById = async (id: string) => {
 };
 
 
+const updateUser = async (id: string, username: string): Promise<User> => {
+  const token = await getToken();
+
+  if (!token) {
+    throw new Error('No token found, retry login');
+  }
+
+  const response = await fetch(`${apiUrl}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ id, username }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Update user error:", errorText);
+    throw new Error('Failed to update user');
+  }
+
+  return response.json();
+};
+
 const UserService = {
   getUsers,
   getUserById,
+  updateUser,
 };
 
 export default UserService;
