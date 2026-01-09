@@ -1,5 +1,6 @@
 import ScreenHeader from '@/components/ScreenHeader';
 import { api } from '@/services/api';
+import UserService from '@/services/UserService';
 import { WorkSession } from '@/types';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -25,7 +26,23 @@ export default function PeerWorksessionsScreen() {
                 .filter(s => !s.isUser)
                 .sort((a, b) => a.time.localeCompare(b.time));
 
-            setSessions(peerSessions);
+            // Fetch user names for each peer session
+            const sessionsWithNames = await Promise.all(
+                peerSessions.map(async (session) => {
+                    try {
+                        const user = await UserService.getUserById(session.ownerId);
+                        return {
+                            ...session,
+                            ownerName: user.username || session.ownerName
+                        };
+                    } catch (error) {
+                        console.error(`Failed to fetch user ${session.ownerId}:`, error);
+                        return session; // Keep original session if fetch fails
+                    }
+                })
+            );
+
+            setSessions(sessionsWithNames);
         } catch (error) {
             console.error(error);
         } finally {
