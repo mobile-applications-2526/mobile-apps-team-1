@@ -7,7 +7,7 @@ import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
-import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function GroupDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -16,10 +16,13 @@ export default function GroupDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showEditGroupModal, setShowEditGroupModal] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState('');
+  const [updatingGroup, setUpdatingGroup] = useState(false);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -125,6 +128,39 @@ export default function GroupDetailScreen() {
     setShowAddMemberModal(true);
   };
 
+  const openEditGroupModal = () => {
+    if (currentUserRole?.toLowerCase() !== 'owner') {
+      Alert.alert('Error', 'Only the owner can edit the group');
+      return;
+    }
+    if (groupDetail) {
+      setEditingGroupName(groupDetail.name);
+      setShowEditGroupModal(true);
+    }
+  };
+
+  const handleUpdateGroupName = async () => {
+    if (!groupDetail) return;
+
+    if (!editingGroupName.trim()) {
+      Alert.alert('Validation Error', 'Group name cannot be empty');
+      return;
+    }
+
+    try {
+      setUpdatingGroup(true);
+      await GroupService.updateGroup(id as string, editingGroupName.trim());
+      setGroupDetail({ ...groupDetail, name: editingGroupName.trim() });
+      setShowEditGroupModal(false);
+      Alert.alert('Success', 'Group name updated successfully');
+    } catch (error) {
+      console.error('Failed to update group:', error);
+      Alert.alert('Error', 'Failed to update group name');
+    } finally {
+      setUpdatingGroup(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -178,7 +214,17 @@ export default function GroupDetailScreen() {
             <View style={styles.iconContainer}>
               <AntDesign name="team" size={40} color="#4B5563" />
             </View>
-            <Text style={styles.name}>{groupDetail.name}</Text>
+            <View style={styles.groupTitleContainer}>
+              <Text style={styles.name}>{groupDetail.name}</Text>
+              {currentUserRole?.toLowerCase() === 'owner' && (
+                <TouchableOpacity 
+                  style={styles.editGroupButton}
+                  onPress={openEditGroupModal}
+                >
+                  <AntDesign name="edit" size={16} color="#2563EB" />
+                </TouchableOpacity>
+              )}
+            </View>
             <Text style={styles.members}>
               {groupDetail.members.length} {groupDetail.members.length === 1 ? 'Member' : 'Members'}
             </Text>
@@ -287,6 +333,59 @@ export default function GroupDetailScreen() {
                 }
               />
             )}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showEditGroupModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditGroupModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Group Name</Text>
+              <TouchableOpacity onPress={() => setShowEditGroupModal(false)}>
+                <AntDesign name="close" size={24} color="#374151" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalForm}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Group Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingGroupName}
+                  onChangeText={setEditingGroupName}
+                  placeholder="Enter group name"
+                  placeholderTextColor="#9CA3AF"
+                  editable={!updatingGroup}
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowEditGroupModal(false)}
+                disabled={updatingGroup}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveButton, updatingGroup && styles.buttonDisabled]}
+                onPress={handleUpdateGroupName}
+                disabled={updatingGroup}
+              >
+                {updatingGroup ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -479,5 +578,74 @@ const styles = StyleSheet.create({
   removeMemberButton: {
     padding: 8,
     paddingRight: 12,
+  },
+  groupTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  editGroupButton: {
+    padding: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalForm: {
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#111827',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });

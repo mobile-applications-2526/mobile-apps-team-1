@@ -70,8 +70,7 @@ const getUserGroups = async () => {
     }
 
     const backendGroups = await response.json();
-    
-    // Filter groups where the user is a member
+
     const userGroups = backendGroups.filter((group: BackendGroup) => 
         group.members.some(member => member.userId === userId)
     );
@@ -95,20 +94,27 @@ const createGroup = async () => {
     return response.json();
 };
 
-// Voor later
-const updateGroup = async () => {
-    const response = await fetch(apiUrl + '/groups/update', {
+const updateGroup = async (groupId: string, name: string): Promise<void> => {
+    const token = await getToken();
+
+    if (!token) {
+        throw new Error('No token found, retry login');
+    }
+
+    const response = await fetch(`${apiUrl}/groups/update`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ groupId, newName: name }),
     });
 
     if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Update group error:", errorText);
         throw new Error('Failed to update group');
     }
-
-    return response.json();
 };
 
 const getGroupById = async (id: string) => {
