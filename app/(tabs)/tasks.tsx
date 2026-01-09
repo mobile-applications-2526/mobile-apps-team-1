@@ -180,7 +180,10 @@ export default function TasksScreen() {
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push('../worksessions/add')}
+      >
         <Feather name="plus" size={24} color="white" />
       </TouchableOpacity>
     </View>
