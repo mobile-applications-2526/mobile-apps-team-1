@@ -148,11 +148,6 @@ export default function TasksScreen() {
             onPress={() => setActiveFilter("TODO")}
           />
           <FilterBadge
-            label="Doing"
-            isActive={activeFilter === "DOING"}
-            onPress={() => setActiveFilter("DOING")}
-          />
-          <FilterBadge
             label="Done"
             isActive={activeFilter === "DONE"}
             onPress={() => setActiveFilter("DONE")}
