@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Platform,
     ScrollView,
     StyleSheet,
@@ -26,7 +27,7 @@ export default function AddTaskScreen() {
                 setCurrentUserId(id);
             } catch (error) {
                 console.error('Error loading user ID:', error);
-                router.replace('/(auth)/login');
+                Alert.alert('Error', 'Failed to load user information');
             }
         };
         loadUserId();
