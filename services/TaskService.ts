@@ -85,10 +85,81 @@ const updateTask = async (task: UpdateTaskDTO): Promise<Task> => {
   return response.json();
 };
 
+const createSubtask = async (taskId: string, title: string): Promise<any> => {
+  const token = await getToken();
+
+  const response = await fetch(`${apiUrl}/tasks/subtask`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ taskId, title }),
+  });
+
+  if (!response.ok) throw new Error('Failed to create subtask');
+  
+  const responseText = await response.text();
+  if (!responseText) {
+    return { id: Math.random().toString(), title, status: 'TODO' };
+  }
+  
+  return JSON.parse(responseText);
+};
+
+const createTask = async (title: string, creatorId: string): Promise<Task> => {
+  const token = await getToken();
+
+  const response = await fetch(`${apiUrl}/tasks`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title, creatorId }),
+  });
+
+  if (!response.ok) throw new Error('Failed to create task');
+  return response.json();
+};
+
+const deleteTask = async (taskId: string): Promise<void> => {
+  const token = await getToken();
+
+  const response = await fetch(`${apiUrl}/tasks`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ taskId }),
+  });
+
+  if (!response.ok) throw new Error('Failed to delete task');
+};
+
+const deleteSubtask = async (taskId: string, subtaskId: string): Promise<void> => {
+  const token = await getToken();
+
+  const response = await fetch(`${apiUrl}/tasks/subtask`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ taskId, subtaskId }),
+  });
+
+  if (!response.ok) throw new Error('Failed to delete subtask');
+};
 
 const TaskService = {
   getTasks,
   updateTask,
+  createSubtask,
+  createTask,
+  deleteTask,
+  deleteSubtask,
 };
 
 export default TaskService;

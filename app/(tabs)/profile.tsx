@@ -69,6 +69,7 @@ export default function ProfileScreen() {
       setUser(data);
     } catch (error) {
       console.error('Failed to load profile', error);
+      await signOut();
     } finally {
       setLoading(false);
     }

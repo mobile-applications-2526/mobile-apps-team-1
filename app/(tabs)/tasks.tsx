@@ -182,7 +182,7 @@ export default function TasksScreen() {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push('../worksessions/add')}
+        onPress={() => router.push('../tasks/add')}
       >
         <Feather name="plus" size={24} color="white" />
       </TouchableOpacity>
